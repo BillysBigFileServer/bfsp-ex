@@ -1,0 +1,3 @@
+[submodule "native/biscuit-rust"]
+	path = native/biscuit-rust
+	url = git@github.com:BillysBigFileServer/biscuit-rust.git
