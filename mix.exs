@@ -21,7 +21,7 @@ defmodule Bfsp.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:protobuf, "~> 0.10.0"},
+      {:protobuf, "~> 0.12.0"},
       {:rustler, "~> 0.31.0"}
     ]
   end
