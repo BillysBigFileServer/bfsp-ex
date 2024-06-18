@@ -23,8 +23,6 @@ defmodule Bfsp.InternalAPI do
 
     msg =
       %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
-      |> EncryptedInternalFileServerMessage.encode()
-      |> prepend_len()
 
     {:ok, resp_bin} = exchange_messages(sock, msg)
     resp = GetUsageResp.decode(resp_bin)
@@ -43,8 +41,6 @@ defmodule Bfsp.InternalAPI do
 
     msg =
       %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
-      |> EncryptedInternalFileServerMessage.encode()
-      |> prepend_len()
 
     {:ok, resp_bin} = exchange_messages(sock, msg)
     resp = GetStorageCapResp.decode(resp_bin)
@@ -64,8 +60,6 @@ defmodule Bfsp.InternalAPI do
 
     msg =
       %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
-      |> EncryptedInternalFileServerMessage.encode()
-      |> prepend_len()
 
     {:ok, resp_bin} = exchange_messages(sock, msg)
     resp = SetStorageCapResp.decode(resp_bin)
@@ -73,11 +67,12 @@ defmodule Bfsp.InternalAPI do
     {:ok, resp}
   end
 
-  defp exchange_messages(sock, msg) do
-    :ok = :gen_tcp.send(sock, msg)
+  defp exchange_messages(sock, %EncryptedInternalFileServerMessage{} = msg) do
+    msg_bin = EncryptedInternalFileServerMessage.encode(msg) |> prepend_len()
+    :ok = :gen_tcp.send(sock, msg_bin)
     {:ok, len_bytes} = :gen_tcp.recv(sock, 4)
 
-    len = :binary.decode_unsigned(len_bytes)
+    len = :binary.decode_unsigned(len_bytes, :little)
 
     resp_bin =
       case len_bytes do
@@ -93,8 +88,8 @@ defmodule Bfsp.InternalAPI do
   end
 
   defp prepend_len(bin) when is_binary(bin) do
-    length = byte_size(bin)
-    <<length::32-integer, bin::binary>>
+    len = byte_size(bin)
+    <<len::32-little, bin::binary>>
   end
 
   defp encrypt(bin) do
