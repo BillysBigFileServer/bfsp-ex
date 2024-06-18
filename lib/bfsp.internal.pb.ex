@@ -14,6 +14,27 @@ defmodule Bfsp.Internal.InternalFileServerMessage.GetStorageCap do
   field :user_ids, 1, repeated: true, type: :int64, json_name: "userIds"
 end
 
+defmodule Bfsp.Internal.InternalFileServerMessage.SetStorageCap.StorageCapsEntry do
+  @moduledoc false
+
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
+
+  field :key, 1, type: :int64
+  field :value, 2, type: :uint64
+end
+
+defmodule Bfsp.Internal.InternalFileServerMessage.SetStorageCap do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
+
+  field :storage_caps, 1,
+    repeated: true,
+    type: Bfsp.Internal.InternalFileServerMessage.SetStorageCap.StorageCapsEntry,
+    json_name: "storageCaps",
+    map: true
+end
+
 defmodule Bfsp.Internal.InternalFileServerMessage do
   @moduledoc false
 
@@ -29,6 +50,11 @@ defmodule Bfsp.Internal.InternalFileServerMessage do
   field :get_storage_cap, 2,
     type: Bfsp.Internal.InternalFileServerMessage.GetStorageCap,
     json_name: "getStorageCap",
+    oneof: 0
+
+  field :set_storage_cap, 3,
+    type: Bfsp.Internal.InternalFileServerMessage.SetStorageCap,
+    json_name: "setStorageCap",
     oneof: 0
 end
 
@@ -103,4 +129,12 @@ defmodule Bfsp.Internal.GetStorageCapResp do
     oneof: 0
 
   field :err, 2, type: :string, oneof: 0
+end
+
+defmodule Bfsp.Internal.SetStorageCapResp do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
+
+  field :err, 1, type: :string
 end

@@ -1,6 +1,7 @@
 defmodule Bfsp.InternalAPI do
   alias Bfsp.Internal.GetStorageCapResp
   alias Bfsp.Internal.GetUsageResp
+  alias Bfsp.Internal.SetStorageCapResp
   alias Bfsp.Internal.InternalFileServerMessage
   alias Bfsp.Internal.EncryptedInternalFileServerMessage
   alias Bfsp.Biscuit
@@ -51,6 +52,28 @@ defmodule Bfsp.InternalAPI do
     {:ok, resp_bin} = :gen_tcp.recv(sock, 0)
 
     resp = GetStorageCapResp.decode(resp_bin)
+
+    {:ok, resp}
+  end
+
+  def set_storage_caps(sock, storage_caps) do
+    {enc_message, nonce} =
+      %InternalFileServerMessage{
+        message:
+          {:set_storage_cap, %InternalFileServerMessage.SetStorageCap{storage_caps: storage_caps}}
+      }
+      |> InternalFileServerMessage.encode()
+      |> encrypt()
+
+    msg =
+      %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
+      |> EncryptedInternalFileServerMessage.encode()
+      |> prepend_len()
+
+    :ok = :gen_tcp.send(sock, msg)
+    {:ok, resp_bin} = :gen_tcp.recv(sock, 0)
+
+    resp = SetStorageCapResp.decode(resp_bin)
 
     {:ok, resp}
   end
