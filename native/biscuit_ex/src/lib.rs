@@ -91,7 +91,7 @@ fn get_user_id(biscuit: String, public_key: String) -> Result<i64, String> {
 #[rustler::nif]
 fn authorize(biscuit: String, public_key: String, authorizer_code: String) -> Result<(), String> {
     let public_key = PublicKey::from_bytes_hex(&public_key).map_err(|e| e.to_string())?;
-    let biscuit = Biscuit::from_base64(biscuit, public_key).unwrap();
+    let biscuit = Biscuit::from_base64(biscuit, public_key).map_err(|e| e.to_string())?;
     let mut authorizer = Authorizer::new();
     authorizer
         .add_code(authorizer_code)
