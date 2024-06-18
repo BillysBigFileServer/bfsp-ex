@@ -27,7 +27,10 @@ defmodule Bfsp.InternalAPI do
       |> prepend_len()
 
     :ok = :gen_tcp.send(sock, msg)
-    {:ok, resp_bin} = :gen_tcp.recv(sock, 0)
+    {:ok, len_bytes} = :gen_tcp.recv(sock, 4)
+
+    len = :binary.decode_unsigned(len_bytes)
+    {:ok, resp_bin} = :gen_tcp.recv(sock, len)
 
     resp = GetUsageResp.decode(resp_bin)
 
@@ -49,13 +52,17 @@ defmodule Bfsp.InternalAPI do
       |> prepend_len()
 
     :ok = :gen_tcp.send(sock, msg)
-    {:ok, resp_bin} = :gen_tcp.recv(sock, 0)
+    {:ok, len_bytes} = :gen_tcp.recv(sock, 4)
+
+    len = :binary.decode_unsigned(len_bytes)
+    {:ok, resp_bin} = :gen_tcp.recv(sock, len)
 
     resp = GetStorageCapResp.decode(resp_bin)
 
     {:ok, resp}
   end
 
+  @spec set_storage_caps(:gen_tcp.t(), map) :: {atom, SetStorageCapResp.t()}
   def set_storage_caps(sock, storage_caps) do
     {enc_message, nonce} =
       %InternalFileServerMessage{
@@ -71,7 +78,10 @@ defmodule Bfsp.InternalAPI do
       |> prepend_len()
 
     :ok = :gen_tcp.send(sock, msg)
-    {:ok, resp_bin} = :gen_tcp.recv(sock, 0)
+    {:ok, len_bytes} = :gen_tcp.recv(sock, 4)
+
+    len = :binary.decode_unsigned(len_bytes)
+    {:ok, resp_bin} = :gen_tcp.recv(sock, len)
 
     resp = SetStorageCapResp.decode(resp_bin)
 
