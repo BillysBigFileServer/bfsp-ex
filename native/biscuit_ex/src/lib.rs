@@ -1,4 +1,8 @@
-use std::{collections::BTreeSet, iter::FromIterator, time::Duration};
+use std::{
+    collections::{BTreeSet, HashMap},
+    iter::FromIterator,
+    time::Duration,
+};
 
 use chacha20poly1305::{aead::Aead, KeyInit, XChaCha20Poly1305};
 use rustler::Binary;
@@ -22,7 +26,11 @@ fn public_key_from_private(private_key: String) -> String {
 }
 
 #[rustler::nif]
-fn generate(private_key: String, facts: Vec<(String, String, Vec<String>)>) -> String {
+fn generate(
+    private_key: String,
+    facts: Vec<(String, String, Vec<String>)>,
+    options: HashMap<String, String>,
+) -> String {
     let private_key = PrivateKey::from_bytes_hex(&private_key).unwrap();
     let root = KeyPair::from(&private_key);
 
@@ -49,7 +57,10 @@ fn generate(private_key: String, facts: Vec<(String, String, Vec<String>)>) -> S
             builder.add_fact(fact).unwrap();
         });
 
-    let biscuit = builder.build(&root).unwrap();
+    let mut biscuit = builder.build(&root).unwrap();
+    if options.get("seal").unwrap_or(&"false".to_string()) == "true" {
+        biscuit = biscuit.seal().unwrap();
+    }
     biscuit.to_base64().unwrap()
 }
 
