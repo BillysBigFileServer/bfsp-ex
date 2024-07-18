@@ -65,6 +65,41 @@ fn generate(
 }
 
 #[rustler::nif]
+fn get_fact(biscuit: String, public_key: String, fact: String) -> Result<String, String> {
+    let public_key = PublicKey::from_bytes_hex(&public_key).map_err(|e| e.to_string())?;
+    let biscuit = Biscuit::from_base64(biscuit, public_key).map_err(|e| e.to_string())?;
+
+    let mut authorizer = Authorizer::new();
+    authorizer
+        .add_token(&biscuit)
+        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    authorizer
+        .add_code(format!(
+            r#"
+        check if {fact}(${fact});
+
+        allow if true;
+        deny if false;
+        "#
+        ))
+        .map_err(|e| e.to_string())?;
+
+    let fact_info: Vec<(String,)> = authorizer
+        .query_with_limits(
+            format!("data($0) <- {fact}($0)").as_str(),
+            RunLimits {
+                max_time: Duration::from_secs(60),
+                ..Default::default()
+            },
+        )
+        .map_err(|e| e.to_string())?;
+
+    let fact: &str = &fact_info.first().unwrap().0;
+    Ok(fact.to_string())
+}
+
+#[rustler::nif]
 fn get_user_id(biscuit: String, public_key: String) -> Result<i64, String> {
     let public_key = PublicKey::from_bytes_hex(&public_key).map_err(|e| e.to_string())?;
     let biscuit = Biscuit::from_base64(biscuit, public_key).map_err(|e| e.to_string())?;
@@ -120,6 +155,14 @@ fn encrypt(message: Binary, key: Binary, nonce: Binary) -> Result<Vec<u8>, Strin
         .map_err(|e| e.to_string())
 }
 
+#[rustler::nif]
+fn decrypt(message: Binary, key: Binary, nonce: Binary) -> Result<Vec<u8>, String> {
+    let key = XChaCha20Poly1305::new_from_slice(key.as_slice()).map_err(|e| e.to_string())?;
+
+    key.decrypt(nonce.as_slice().into(), message.as_slice())
+        .map_err(|e| e.to_string())
+}
+
 rustler::init!(
     "Elixir.Bfsp.Biscuit",
     [
@@ -129,5 +172,7 @@ rustler::init!(
         public_key_from_private,
         get_user_id,
         encrypt,
+        decrypt,
+        get_fact,
     ]
 );
