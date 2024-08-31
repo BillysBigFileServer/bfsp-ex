@@ -2,6 +2,9 @@
 
 **TODO: Add description**
 
+## Update bfsp.internal.pb.ex
+`nix shell nixpkgs#protoc-gen-elixir --command protoc --elixir_out=./lib ~/Projects/bbfs/bfsp/src/bfsp.internal.proto -I ~/Projects/bbfs/bfsp/src/`
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

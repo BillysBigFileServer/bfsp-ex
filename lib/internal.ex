@@ -1,4 +1,7 @@
 defmodule Bfsp.InternalAPI do
+  alias Bfsp.Internal.DeleteQueuedActionResp
+  alias Bfsp.Internal.QueueActionResp
+  alias Bfsp.Internal.ActionInfo
   alias Bfsp.Internal.GetStorageCapResp
   alias Bfsp.Internal.GetUsageResp
   alias Bfsp.Internal.SetStorageCapResp
@@ -65,6 +68,50 @@ defmodule Bfsp.InternalAPI do
     resp = SetStorageCapResp.decode(resp_bin)
 
     {:ok, resp}
+  end
+
+  @spec queue_action(:gen_tcp.t(), ActionInfo) :: {atom, ActionInfo}
+  def queue_action(sock, action_info) do
+    {enc_message, nonce} =
+      %InternalFileServerMessage{
+        message: {:queue_action, %InternalFileServerMessage.QueueAction{action: action_info}}
+      }
+      |> InternalFileServerMessage.encode()
+      |> encrypt()
+
+    msg =
+      %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
+
+    {:ok, resp_bin} = exchange_messages(sock, msg)
+    {resp_type, resp} = QueueActionResp.decode(resp_bin)
+
+    case resp_type do
+      :action -> {:ok, resp}
+      :err -> {:err, resp}
+    end
+  end
+
+  @spec delete_queued_action(:gen_tcp.t(), integer()) :: atom | {atom, String.t()}
+  def delete_queued_action(sock, action_id) do
+    {enc_message, nonce} =
+      %InternalFileServerMessage{
+        message:
+          {:delete_queued_action,
+           %InternalFileServerMessage.DeleteQueuedAction{action_id: action_id}}
+      }
+      |> InternalFileServerMessage.encode()
+      |> encrypt()
+
+    msg =
+      %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
+
+    {:ok, resp_bin} = exchange_messages(sock, msg)
+    resp = DeleteQueuedActionResp.decode(resp_bin)
+
+    case resp.err == nil do
+      true -> :ok
+      false -> {:err, resp.err}
+    end
   end
 
   defp exchange_messages(sock, %EncryptedInternalFileServerMessage{} = msg) do
