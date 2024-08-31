@@ -83,11 +83,11 @@ defmodule Bfsp.InternalAPI do
       %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
 
     {:ok, resp_bin} = exchange_messages(sock, msg)
-    {resp_type, resp} = QueueActionResp.decode(resp_bin)
+    resp = QueueActionResp.decode(resp_bin)
 
-    case resp_type do
-      :action -> {:ok, resp}
-      :err -> {:err, resp}
+    case resp.response do
+      {:action, action} -> {:ok, action}
+      {:err, err} -> {:err, err}
     end
   end
 
@@ -114,6 +114,8 @@ defmodule Bfsp.InternalAPI do
     end
   end
 
+  @spec exchange_messages(:gen_tcp.t(), EncryptedInternalFileServerMessage.t()) ::
+          {atom, binary()}
   defp exchange_messages(sock, %EncryptedInternalFileServerMessage{} = msg) do
     msg_bin = EncryptedInternalFileServerMessage.encode(msg) |> prepend_len()
     :ok = :gen_tcp.send(sock, msg_bin)

@@ -22,6 +22,7 @@ defmodule Bfsp.MixProject do
   defp deps do
     [
       {:protobuf, "~> 0.12.0"},
+      {:google_protos, "~> 0.1"},
       {:rustler, "~> 0.31.0"}
     ]
   end
