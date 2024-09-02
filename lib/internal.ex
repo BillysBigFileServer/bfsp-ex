@@ -1,4 +1,6 @@
 defmodule Bfsp.InternalAPI do
+  alias Bfsp.Internal.GetQueuedActionResp.ActionsPerUser
+  alias Bfsp.Internal.GetQueuedActionResp
   alias Bfsp.Internal.DeleteQueuedActionResp
   alias Bfsp.Internal.QueueActionResp
   alias Bfsp.Internal.ActionInfo
@@ -111,6 +113,32 @@ defmodule Bfsp.InternalAPI do
     case resp.err == nil do
       true -> :ok
       false -> {:err, resp.err}
+    end
+  end
+
+  @spec get_queued_actions_for_user(:gen_tcp.t(), [integer()]) ::
+          {atom, ActionsPerUser | String.t()}
+  def get_queued_actions_for_user(sock, user_ids) do
+    {enc_message, nonce} =
+      %InternalFileServerMessage{
+        message:
+          {:get_queued_actions, %InternalFileServerMessage.GetQueuedActions{user_ids: user_ids}}
+      }
+      |> InternalFileServerMessage.encode()
+      |> encrypt()
+
+    msg =
+      %EncryptedInternalFileServerMessage{nonce: nonce, enc_message: enc_message}
+
+    {:ok, resp_bin} = exchange_messages(sock, msg)
+    resp = GetQueuedActionResp.decode(resp_bin)
+
+    case resp.response do
+      {:actions, actions} ->
+        {:ok, actions}
+
+      {:err, err} ->
+        {:err, err}
     end
   end
 

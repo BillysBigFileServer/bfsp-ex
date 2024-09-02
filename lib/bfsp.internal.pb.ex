@@ -71,7 +71,7 @@ defmodule Bfsp.Internal.InternalFileServerMessage.QueueAction do
   field :action, 1, type: Bfsp.Internal.ActionInfo
 end
 
-defmodule Bfsp.Internal.InternalFileServerMessage.GetQueuedAction do
+defmodule Bfsp.Internal.InternalFileServerMessage.GetQueuedActions do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
@@ -124,9 +124,9 @@ defmodule Bfsp.Internal.InternalFileServerMessage do
     json_name: "queueAction",
     oneof: 0
 
-  field :get_action, 7,
-    type: Bfsp.Internal.InternalFileServerMessage.GetQueuedAction,
-    json_name: "getAction",
+  field :get_queued_actions, 7,
+    type: Bfsp.Internal.InternalFileServerMessage.GetQueuedActions,
+    json_name: "getQueuedActions",
     oneof: 0
 
   field :delete_queued_action, 8,
@@ -290,35 +290,43 @@ defmodule Bfsp.Internal.QueueActionResp do
   field :err, 2, type: :string, oneof: 0
 end
 
-defmodule Bfsp.Internal.GetActionResp.ActionsPerUser.ActionInfoEntry do
+defmodule Bfsp.Internal.GetQueuedActionResp.Actions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
+
+  field :actions, 1, repeated: true, type: Bfsp.Internal.ActionInfo
+end
+
+defmodule Bfsp.Internal.GetQueuedActionResp.ActionsPerUser.ActionInfoEntry do
   @moduledoc false
 
   use Protobuf, map: true, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
 
   field :key, 1, type: :int64
-  field :value, 2, type: Bfsp.Internal.ActionInfo
+  field :value, 2, type: Bfsp.Internal.GetQueuedActionResp.Actions
 end
 
-defmodule Bfsp.Internal.GetActionResp.ActionsPerUser do
+defmodule Bfsp.Internal.GetQueuedActionResp.ActionsPerUser do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
 
   field :action_info, 1,
     repeated: true,
-    type: Bfsp.Internal.GetActionResp.ActionsPerUser.ActionInfoEntry,
+    type: Bfsp.Internal.GetQueuedActionResp.ActionsPerUser.ActionInfoEntry,
     json_name: "actionInfo",
     map: true
 end
 
-defmodule Bfsp.Internal.GetActionResp do
+defmodule Bfsp.Internal.GetQueuedActionResp do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
 
   oneof :response, 0
 
-  field :actions, 1, type: Bfsp.Internal.GetActionResp.ActionsPerUser, oneof: 0
+  field :actions, 1, type: Bfsp.Internal.GetQueuedActionResp.ActionsPerUser, oneof: 0
   field :err, 2, type: :string, oneof: 0
 end
 

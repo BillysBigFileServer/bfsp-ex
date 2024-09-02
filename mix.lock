@@ -1,4 +1,5 @@
 %{
+  "google_protos": {:hex, :google_protos, "0.4.0", "93e1be2c1a07517ffed761f69047776caf35e4acd385aac4f5ce4fedd07f3660", [:mix], [{:protobuf, "~> 0.10", [hex: :protobuf, repo: "hexpm", optional: false]}], "hexpm", "4c54983d78761a3643e2198adf0f5d40a5a8b08162f3fc91c50faa257f3fa19f"},
   "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
   "protobuf": {:hex, :protobuf, "0.12.0", "58c0dfea5f929b96b5aa54ec02b7130688f09d2de5ddc521d696eec2a015b223", [:mix], [{:jason, "~> 1.2", [hex: :jason, repo: "hexpm", optional: true]}], "hexpm", "75fa6cbf262062073dd51be44dd0ab940500e18386a6c4e87d5819a58964dc45"},
   "rustler": {:hex, :rustler, "0.31.0", "7e5eefe61e6e6f8901e5aa3de60073d360c6320d9ec363027b0197297b80c46a", [:mix], [{:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}, {:toml, "~> 0.6", [hex: :toml, repo: "hexpm", optional: false]}], "hexpm", "99e378459bfb9c3bda6d3548b2b3bc6f9ad97f728f76bdbae7bf5c770a4f8abd"},
