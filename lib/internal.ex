@@ -72,7 +72,7 @@ defmodule Bfsp.InternalAPI do
     {:ok, resp}
   end
 
-  @spec queue_action(:gen_tcp.t(), ActionInfo) :: {atom, ActionInfo}
+  @spec queue_action(:gen_tcp.t(), ActionInfo.t()) :: {atom, ActionInfo.t()}
   def queue_action(sock, action_info) do
     {enc_message, nonce} =
       %InternalFileServerMessage{
