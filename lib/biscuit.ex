@@ -9,4 +9,5 @@ defmodule Bfsp.Biscuit do
   def encrypt(_message, _key, _nonce), do: :erlang.nif_error(:nif_not_loaded)
   def decrypt(_message, _key, _nonce), do: :erlang.nif_error(:nif_not_loaded)
   def get_fact(_biscuit, _public_key, _fact), do: :erlang.nif_error(:nif_not_loaded)
+  def revocation_identifiers(_biscuit, _public_key), do: :erlang.nif_error(:nif_not_loaded)
 end

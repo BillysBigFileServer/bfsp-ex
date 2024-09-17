@@ -5,7 +5,7 @@ use std::{
 };
 
 use chacha20poly1305::{aead::Aead, KeyInit, XChaCha20Poly1305};
-use rustler::Binary;
+use rustler::{Binary, Env, OwnedBinary};
 
 use biscuit_auth::{
     builder::{fact, string, BiscuitBuilder, Fact, Term},
@@ -163,6 +163,25 @@ fn decrypt(message: Binary, key: Binary, nonce: Binary) -> Result<Vec<u8>, Strin
         .map_err(|e| e.to_string())
 }
 
+#[rustler::nif]
+fn revocation_identifiers<'a>(
+    env: Env<'a>,
+    biscuit: String,
+    public_key: String,
+) -> Result<Vec<Binary<'a>>, String> {
+    let public_key = PublicKey::from_bytes_hex(&public_key).map_err(|e| e.to_string())?;
+    let biscuit = Biscuit::from_base64(biscuit, public_key).map_err(|e| e.to_string())?;
+    Ok(biscuit
+        .revocation_identifiers()
+        .into_iter()
+        .map(|bin: Vec<u8>| {
+            let mut elixir_bin = OwnedBinary::new(bin.len()).unwrap();
+            elixir_bin.copy_from_slice(bin.as_slice());
+            elixir_bin.release(env)
+        })
+        .collect())
+}
+
 rustler::init!(
     "Elixir.Bfsp.Biscuit",
     [
@@ -174,5 +193,6 @@ rustler::init!(
         encrypt,
         decrypt,
         get_fact,
+        revocation_identifiers,
     ]
 );
